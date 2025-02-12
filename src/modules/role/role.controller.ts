@@ -54,6 +54,6 @@ export class RoleController {
 
   @Post('/update')
   saveOrUpdateBulk(@Body(new ValidationPipe()) bulkRolesDto: BulkRolesDto) {
-    return this.roleService.saveOrUpdate(bulkRolesDto.roles);
+    return this.roleService.saveOrUpdate(bulkRolesDto);
   }
 }

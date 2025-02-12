@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model } from 'mongoose';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { Role } from './entities/role.entity';
+import { BulkRolesDto } from './dto/bulk-roles.dto';
 
 @Injectable()
 export class RoleService {
@@ -17,7 +18,7 @@ export class RoleService {
   }
 
   findAll(): Promise<Role[]> {
-    return this.roleModel.find().exec();
+    return this.roleModel.find().lean().exec();
   }
 
   async findOne(id: string) {
@@ -25,10 +26,6 @@ export class RoleService {
       this.roleModel.findById(id).lean().exec(),
     );
   }
-
-  // update(id: number, updateRoleDto: UpdateRoleDto) {
-  //   return `This action updates a #${id} role`;
-  // }
 
   remove(id: string) {
     return this.roleModel.findById(id).deleteOne();
@@ -43,10 +40,8 @@ export class RoleService {
     );
   }
 
-  async saveOrUpdate(
-    roles: (CreateRoleDto & { _id?: string })[],
-  ): Promise<Role[]> {
-    const bulkWrite = roles.map((role) => {
+  async saveOrUpdate(bulkRolesDto: BulkRolesDto): Promise<Role[]> {
+    const bulkWrite = bulkRolesDto.roles.map((role) => {
       if (role._id && !isValidObjectId(role._id)) {
         throw new NotFoundException(
           `Role not found: ${role._id} is not a valid id`,
@@ -62,9 +57,21 @@ export class RoleService {
       };
     });
 
-    await this.roleModel.bulkWrite(bulkWrite);
+    const bulkDelete = bulkRolesDto.deleteRoles.map((id) => {
+      if (!isValidObjectId(id)) {
+        throw new NotFoundException(`Role not found: ${id} is not a valid id`);
+      }
 
-    return await this.roleModel.find().exec();
+      return {
+        deleteOne: {
+          filter: { _id: id },
+        },
+      };
+    });
+
+    await this.roleModel.bulkWrite([...bulkWrite, ...bulkDelete]);
+
+    return await this.roleModel.find().lean().exec();
   }
 
   private async handleDatabaseFindsByIds(
