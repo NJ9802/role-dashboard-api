@@ -43,19 +43,43 @@ export class RoleService {
     );
   }
 
+  async saveOrUpdate(
+    roles: (CreateRoleDto & { _id?: string })[],
+  ): Promise<Role[]> {
+    const bulkWrite = roles.map((role) => {
+      if (role._id && !isValidObjectId(role._id)) {
+        throw new NotFoundException(
+          `Role not found: ${role._id} is not a valid id`,
+        );
+      }
+
+      return {
+        updateOne: {
+          filter: role._id ? { _id: role._id } : { name: role.name },
+          update: role,
+          upsert: true,
+        },
+      };
+    });
+
+    await this.roleModel.bulkWrite(bulkWrite);
+
+    return await this.roleModel.find().exec();
+  }
+
   private async handleDatabaseFindsByIds(
     id: string,
     callback: () => Promise<Role | null>,
   ): Promise<Role> {
     if (!isValidObjectId(id)) {
-      throw new NotFoundException('Role not found');
+      throw new NotFoundException(`Role not found: ${id} is not a valid id`);
     }
 
     try {
       const role = await callback();
 
       if (!role) {
-        throw new NotFoundException('Role not found');
+        throw new NotFoundException(`Role not found: ${id} is not a valid id`);
       }
 
       return role;

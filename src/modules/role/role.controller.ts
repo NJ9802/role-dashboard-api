@@ -11,6 +11,7 @@ import {
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RoleService } from './role.service';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { BulkRolesDto } from './dto/bulk-roles.dto';
 
 @Controller('role')
 export class RoleController {
@@ -49,5 +50,10 @@ export class RoleController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.roleService.remove(id);
+  }
+
+  @Post('/update')
+  saveOrUpdateBulk(@Body(new ValidationPipe()) bulkRolesDto: BulkRolesDto) {
+    return this.roleService.saveOrUpdate(bulkRolesDto.roles);
   }
 }
