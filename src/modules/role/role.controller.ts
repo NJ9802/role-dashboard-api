@@ -6,19 +6,18 @@ import {
   Param,
   Patch,
   Post,
-  ValidationPipe,
 } from '@nestjs/common';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { RoleService } from './role.service';
-import { UpdateRoleDto } from './dto/update-role.dto';
 import { BulkRolesDto } from './dto/bulk-roles.dto';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
+import { RoleService } from './role.service';
 
 @Controller('role')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Post()
-  create(@Body(new ValidationPipe()) createRoleDto: CreateRoleDto) {
+  create(@Body() createRoleDto: CreateRoleDto) {
     return this.roleService.create(createRoleDto);
   }
 
@@ -32,14 +31,10 @@ export class RoleController {
     return this.roleService.findOne(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-  //   return this.roleService.update(+id, updateRoleDto);
-  // }
   @Patch('/update-permissions/:id')
   updatePermissions(
     @Param('id') id: string,
-    @Body(new ValidationPipe()) updateRoleDto: UpdateRoleDto,
+    @Body() updateRoleDto: UpdateRoleDto,
   ) {
     return this.roleService.updatePermissions(
       id,
@@ -53,7 +48,7 @@ export class RoleController {
   }
 
   @Post('/update')
-  saveOrUpdateBulk(@Body(new ValidationPipe()) bulkRolesDto: BulkRolesDto) {
+  saveOrUpdateBulk(@Body() bulkRolesDto: BulkRolesDto) {
     return this.roleService.saveOrUpdate(bulkRolesDto);
   }
 }

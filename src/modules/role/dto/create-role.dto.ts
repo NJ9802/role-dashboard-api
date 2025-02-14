@@ -1,7 +1,15 @@
-import { IsArray, IsString, Matches } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
 
 export class CreateRoleDto {
   @IsString()
+  @IsNotEmpty()
+  @MinLength(3)
   name: string;
 
   @IsArray()
