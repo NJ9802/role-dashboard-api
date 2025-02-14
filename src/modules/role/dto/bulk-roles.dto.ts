@@ -1,12 +1,12 @@
-import { IsArray, IsString, ValidateNested } from 'class-validator';
-import { CreateRoleDto } from './create-role.dto';
 import { Type } from 'class-transformer';
+import { IsArray, IsString, ValidateNested } from 'class-validator';
+import { CreateOrUpdateDto } from './update-role.dto';
 
 export class BulkRolesDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateRoleDto)
-  roles: (CreateRoleDto & { _id?: string })[];
+  @Type(() => CreateOrUpdateDto)
+  roles: CreateOrUpdateDto[];
 
   @IsArray()
   @IsString({ each: true })
